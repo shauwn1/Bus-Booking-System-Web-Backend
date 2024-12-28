@@ -17,3 +17,5 @@ const operatorProtect = (req, res, next) => {
 };
 
 module.exports = operatorProtect;
+
+
