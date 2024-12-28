@@ -84,20 +84,18 @@ exports.getPermits = async (req, res) => {
   try {
     const query = {};
     if (routeId) query.routeId = routeId;
-    if (busNumber) {
-      const bus = await Bus.findOne({ busNumber });
-      if (bus) query.busId = bus._id;
-    }
+    if (busNumber) query.busNumber = busNumber;
     if (isActive) query.isActive = isActive === 'true';
 
     const permits = await Permit.find(query)
-      .populate('busId', 'busNumber')
-      .populate('routeId', 'routeId startPoint endPoint');
+      .populate('routeId', 'routeId startPoint endPoint distance'); // Populate route details if required
+
     res.status(200).json(permits);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching permits', error: err.message });
   }
 };
+
 
 // Deactivate a Permit
 exports.deactivatePermit = async (req, res) => {
