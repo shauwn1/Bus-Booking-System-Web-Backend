@@ -31,11 +31,12 @@ exports.addBus = async (req, res) => {
 
 // Update a Bus
 exports.updateBus = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // This should be the busNumber, not the _id
   const { type, capacity, isActive } = req.body;
 
   try {
-    const bus = await Bus.findById(id);
+    // Find the bus by busNumber instead of _id
+    const bus = await Bus.findOne({ busNumber: id });
     if (!bus) {
       return res.status(404).json({ message: 'Bus not found' });
     }
@@ -52,6 +53,7 @@ exports.updateBus = async (req, res) => {
   }
 };
 
+
 // Get All Buses
 exports.getBuses = async (req, res) => {
   try {
@@ -64,18 +66,25 @@ exports.getBuses = async (req, res) => {
 
 // Deactivate a Bus
 exports.deactivateBus = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // This is the busNumber
 
   try {
-    const bus = await Bus.findById(id);
+    // Find the bus by busNumber
+    const bus = await Bus.findOne({ busNumber: id });
     if (!bus) {
       return res.status(404).json({ message: 'Bus not found' });
     }
 
-    bus.isActive = false; // Mark as inactive
+    // Mark the bus as inactive
+    if (!bus.isActive) {
+      return res.status(400).json({ message: 'Bus is already deactivated' });
+    }
+    bus.isActive = false;
+
     const deactivatedBus = await bus.save();
     res.status(200).json({ message: 'Bus deactivated', deactivatedBus });
   } catch (err) {
     res.status(500).json({ message: 'Error deactivating bus', error: err.message });
   }
 };
+

@@ -11,6 +11,7 @@ const routeRoutes = require('./routes/admin/routeRoutes');
 const scheduleRoutes = require('./routes/admin/scheduleRoutes');
 const busRoutes = require('./routes/admin/busRoutes');
 const permitRoutes = require('./routes/admin/permitRoutes');
+const busOperatorAuthRoutes = require('./routes/busOperator/busOperatorAuthRoutes');
 
 // Import Error Handling Middleware
 const errorHandler = require('./middlewares/errorHandler');
@@ -32,7 +33,7 @@ app.use('/api/routes', routeRoutes); // For routes management
 app.use('/api/schedules', scheduleRoutes); // For schedules management
 app.use('/api/admin/buses', busRoutes); // For bus management
 app.use('/api/admin/permits', permitRoutes); // Permit routes
-
+app.use('/api/bus-operators/auth', busOperatorAuthRoutes);
 // Error Handling Middleware
 app.use(errorHandler);
 

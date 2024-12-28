@@ -11,4 +11,15 @@ const hashPassword = async (plainPassword) => {
 };
 
 // Call the function with your admin's plaintext password
-hashPassword('AdminPassword123');
+hashPassword('StrongPass123');
+
+
+
+const storedHash = "$2a$10$uhPt2JuR5CzQ1WeZbU5K4OYXPfTEhehtXwSDsLoKz1cZOfrzRs3uq"; // Replace with the hashed password from your database
+const plainPassword = "StrongPass123"; // Replace with the password you're testing
+
+bcrypt.compare(plainPassword, storedHash, (err, isMatch) => {
+  if (err) throw err;
+  console.log("Password match:", isMatch); // Should log true if it matches
+});
+

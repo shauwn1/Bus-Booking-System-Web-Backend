@@ -6,20 +6,19 @@ const busOperatorSchema = new mongoose.Schema(
     operatorId: {
       type: String,
       required: true,
-      unique: true, // Ensure custom operator ID is unique
+      unique: true,
     },
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     isActive: { type: Boolean, default: true },
-    nic: { type: String, required: true, unique: true }, // National Identity Card
+    nic: { type: String, required: true, unique: true },
+    role: { type: String, enum: ['operator'], default: 'operator' }, // Role field
   },
-  {
-    timestamps: true, // Automatically adds createdAt and updatedAt fields
-  }
+  { timestamps: true }
 );
 
-// Encrypt password before saving
+// Hash password before saving
 busOperatorSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
   const salt = await bcrypt.genSalt(10);
@@ -27,7 +26,7 @@ busOperatorSchema.pre('save', async function (next) {
   next();
 });
 
-// Method to compare entered password with hashed password
+// Compare entered password with hashed password
 busOperatorSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
