@@ -1,18 +1,14 @@
 const express = require('express');
 const { addBus, updateBus, getBuses, deactivateBus } = require('../../controllers/admin/busController');
+const protect = require('../../middlewares/authMiddleware');
+const verifyAdminRole = require('../../middlewares/roleMiddleware');
 
 const router = express.Router();
 
-// Add a Bus
-router.post('/', addBus);
-
-// Update a Bus
-router.put('/:id', updateBus);
-
-// Get All Buses
-router.get('/', getBuses);
-
-// Deactivate a Bus
-router.delete('/:id', deactivateBus);
+// Protect all bus-related routes
+router.post('/', protect, verifyAdminRole, addBus);
+router.put('/:id', protect, verifyAdminRole, updateBus);
+router.get('/', protect, verifyAdminRole, getBuses);
+router.delete('/:id', protect, verifyAdminRole, deactivateBus);
 
 module.exports = router;

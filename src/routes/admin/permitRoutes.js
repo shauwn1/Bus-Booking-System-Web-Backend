@@ -5,19 +5,15 @@ const {
   getPermits,
   deactivatePermit,
 } = require('../../controllers/admin/permitController');
+const protect = require('../../middlewares/authMiddleware');
+const verifyAdminRole = require('../../middlewares/roleMiddleware');
 
 const router = express.Router();
 
-// Issue a Permit
-router.post('/', issuePermit);
-
-// Update a Permit
-router.put('/:id', updatePermit);
-
-// Get All Permits
-router.get('/', getPermits);
-
-// Deactivate a Permit
-router.delete('/:id', deactivatePermit);
+// Protect all permit-related routes
+router.post('/', protect, verifyAdminRole, issuePermit);
+router.put('/:id', protect, verifyAdminRole, updatePermit);
+router.get('/', protect, verifyAdminRole, getPermits);
+router.delete('/:id', protect, verifyAdminRole, deactivatePermit);
 
 module.exports = router;
