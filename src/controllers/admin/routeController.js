@@ -22,20 +22,23 @@ exports.createRoute = async (req, res) => {
 
 // Get All Routes or Filter by Criteria
 exports.getRoutes = async (req, res) => {
-  const { startPoint, endPoint } = req.query;
+  const { startPoint, endPoint, sort } = req.query;
 
   try {
     const query = {};
     if (startPoint) query.startPoint = startPoint;
     if (endPoint) query.endPoint = endPoint;
 
-    const routes = await Route.find(query).select('routeId startPoint endPoint distance stops');
+    const routes = await Route.find(query)
+      .select('routeId startPoint endPoint distance stops')
+      .sort(sort || 'routeId');
+
     res.status(200).json(routes);
   } catch (err) {
-    console.error('Error fetching routes:', err);
     res.status(500).json({ message: 'Error fetching routes', error: err.message });
   }
 };
+
 
 // Update a Route
 exports.updateRoute = async (req, res) => {

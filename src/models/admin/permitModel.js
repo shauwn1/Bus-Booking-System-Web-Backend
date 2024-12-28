@@ -7,7 +7,7 @@ const permitSchema = new mongoose.Schema({
     unique: true,
   },
   busNumber: {
-    type: String,
+    type: String, // Use busNumber directly
     required: true,
   },
   routeId: {

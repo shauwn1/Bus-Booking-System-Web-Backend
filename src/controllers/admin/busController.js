@@ -54,15 +54,44 @@ exports.updateBus = async (req, res) => {
 };
 
 
-// Get All Buses
+
+const crypto = require('crypto');
+
+// Get All Buses with Filtering, Sorting, Pagination, and ETag
 exports.getBuses = async (req, res) => {
   try {
-    const buses = await Bus.find();
+    const { type, capacity, isActive, sort, limit = 10, page = 1 } = req.query;
+
+    // Filtering
+    const filter = {};
+    if (type) filter.type = type;
+    if (capacity) filter.capacity = capacity;
+    if (typeof isActive !== 'undefined') filter.isActive = isActive === 'true';
+
+    // Pagination
+    const skip = (page - 1) * limit;
+
+    // Fetch filtered, sorted, and paginated data
+    const buses = await Bus.find(filter)
+      .sort(sort || 'busNumber') // Sorting
+      .skip(skip) // Pagination
+      .limit(parseInt(limit)); // Limit results
+
+    // Generate ETag for content
+    const dataHash = crypto.createHash('md5').update(JSON.stringify(buses)).digest('hex');
+    const clientETag = req.headers['if-none-match'];
+
+    if (clientETag === dataHash) {
+      return res.status(304).end(); // Content not modified
+    }
+
+    res.set('ETag', dataHash);
     res.status(200).json(buses);
   } catch (err) {
     res.status(500).json({ message: 'Error fetching buses', error: err.message });
   }
 };
+
 
 // Deactivate a Bus
 exports.deactivateBus = async (req, res) => {
