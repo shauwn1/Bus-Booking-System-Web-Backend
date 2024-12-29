@@ -29,9 +29,11 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./routes/**/*.js'], // Adjust the path to your route files
+  apis: ['./src/routes/**/*.js'], 
+
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
+console.log(swaggerDocs); // Debug log to check the generated spec
 module.exports = swaggerDocs;

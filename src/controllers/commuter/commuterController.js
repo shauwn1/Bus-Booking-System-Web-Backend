@@ -15,75 +15,72 @@ exports.searchAvailableBuses = async (req, res) => {
     }
 
     // Find routes that include both boardingPlace and destinationPlace
-    const routes = await Route.find({
-      stops: { $all: [boardingPlace, destinationPlace] },
-    });
+    const routes = await Route.find();
 
-    if (!routes.length) {
-      return res.status(404).json({ message: 'No routes found matching the provided boarding and destination places' });
-    }
-
-    // Filter routes where boardingPlace comes before destinationPlace
-    const validRoutes = routes.filter(route => {
-      const boardingIndex = route.stops.indexOf(boardingPlace);
-      const destinationIndex = route.stops.indexOf(destinationPlace);
-      return boardingIndex < destinationIndex; // Ensure boardingPlace comes before destinationPlace
-    });
-
-    if (!validRoutes.length) {
-      return res.status(404).json({ message: 'No valid routes found where boarding place comes before destination place' });
-    }
-
-    // Extract valid route IDs
-    const validRouteIds = validRoutes.map(route => route.routeId);
-
-    // Find schedules for the valid routes on the specified date
-    const schedules = await Schedule.find({
-      routeId: { $in: validRouteIds },
-      days: { $in: [new Date(date).toLocaleDateString('en-US', { weekday: 'long' })] },
-    });
-
-    if (!schedules.length) {
-      return res.status(404).json({ message: 'No schedules found for the provided date and route' });
-    }
-
-    // Filter schedules by ensuring the stops meet the boarding and destination conditions
-    const filteredSchedules = schedules.filter(schedule => {
-      const stopNames = schedule.stops.map(stop => stop.stopName);
-      const boardingIndex = stopNames.indexOf(boardingPlace);
-      const destinationIndex = stopNames.indexOf(destinationPlace);
+    const validRoutes = routes.filter((route) => {
+      const allStops = [route.startPoint, ...route.stops, route.endPoint];
+      const boardingIndex = allStops.indexOf(boardingPlace);
+      const destinationIndex = allStops.indexOf(destinationPlace);
       return boardingIndex !== -1 && destinationIndex !== -1 && boardingIndex < destinationIndex;
     });
 
-    if (!filteredSchedules.length) {
-      return res.status(404).json({ message: 'No valid schedules found for the provided boarding and destination places' });
+    if (!validRoutes.length) {
+      return res.status(404).json({ message: 'No valid routes found for the provided boarding and destination places' });
     }
 
-    // Populate bus details for each valid schedule
-    const populatedSchedules = await Promise.all(
-      filteredSchedules.map(async schedule => {
+    const busesWithPrices = [];
+
+    // Loop through valid routes to find schedules and prices
+    for (const route of validRoutes) {
+      const priceInfo = route.prices.find(
+        (price) => price.from === boardingPlace && price.to === destinationPlace
+      );
+      if (!priceInfo) {
+        continue; // Skip if no price is found
+      }
+
+      // Find schedules for the valid route on the specified date
+      const schedules = await Schedule.find({
+        routeId: route.routeId,
+        days: {
+          $in: [new Date(date).toLocaleDateString('en-US', { weekday: 'long' })],
+        },
+      });
+
+      // Populate bus details and add pricing
+      for (const schedule of schedules) {
         const bus = await Bus.findOne({ busNumber: schedule.busNumber });
-        return {
+        if (!bus) continue;
+
+        busesWithPrices.push({
           scheduleId: schedule.scheduleId,
-          routeId: schedule.routeId,
+          routeId: route.routeId,
           busNumber: schedule.busNumber,
-          type: bus?.type || 'Unknown',
-          capacity: bus?.capacity || 0,
+          type: bus.type || 'Unknown',
+          capacity: bus.capacity || 0,
           boardingPlace,
           destinationPlace,
+          price: priceInfo.price,
           startTime: schedule.startTime,
           endTime: schedule.endTime,
           stops: schedule.stops,
-        };
-      })
-    );
+        });
+      }
+    }
 
-    res.status(200).json({ buses: populatedSchedules });
+    if (!busesWithPrices.length) {
+      return res.status(404).json({ message: 'No schedules with price data found for the provided boarding and destination places' });
+    }
+
+    res.status(200).json({ buses: busesWithPrices });
   } catch (err) {
     console.error('Error searching available buses:', err.message);
     res.status(500).json({ message: 'Error searching available buses', error: err.message });
   }
 };
+
+
+
 
 
 // Search for Available Buses
@@ -160,6 +157,8 @@ const processRefund = (transactionId) => {
 };
 
 // Book a Seat with Payment
+const sendEmail = require('../../utils/sendEmail');
+
 exports.bookSeatWithPayment = async (req, res) => {
   const {
     busNumber,
@@ -169,7 +168,7 @@ exports.bookSeatWithPayment = async (req, res) => {
     email,
     boardingPlace,
     destinationPlace,
-    date,
+    date, // Include time in the date field
   } = req.body;
 
   try {
@@ -179,15 +178,41 @@ exports.bookSeatWithPayment = async (req, res) => {
       return res.status(404).json({ message: 'Bus is inactive or not found' });
     }
 
-    // Check if the seat is already booked for the specified date
+    // Check if the seat is already booked for the specified date and time
     const existingBooking = await Booking.findOne({
       busNumber,
       seatNumber,
-      date,
+      date: new Date(date),
     });
     if (existingBooking) {
       return res.status(400).json({ message: 'Seat already booked' });
     }
+
+    // Fetch the schedule and ensure the time falls within the schedule range
+    const schedule = await Schedule.findOne({
+      busNumber,
+      startTime: { $lte: new Date(date) },
+      endTime: { $gte: new Date(date) },
+    });
+
+    if (!schedule) {
+      return res.status(404).json({ message: 'No schedule found for this bus at the given date and time' });
+    }
+
+    // Fetch the route and find the price
+    const route = await Route.findOne({ routeId: schedule.routeId });
+    if (!route) {
+      return res.status(404).json({ message: 'No route found for this schedule' });
+    }
+
+    const priceInfo = route.prices.find(
+      (price) => price.from === boardingPlace && price.to === destinationPlace
+    );
+    if (!priceInfo) {
+      return res.status(400).json({ message: 'No price found for the given boarding and destination places' });
+    }
+
+    const price = priceInfo.price;
 
     // Process mock payment
     const paymentResult = processPayment();
@@ -207,15 +232,38 @@ exports.bookSeatWithPayment = async (req, res) => {
       email,
       boardingPlace,
       destinationPlace,
-      date,
+      date: new Date(date),
       transactionId: paymentResult.transactionId,
       cancellationToken,
     });
 
     const savedBooking = await booking.save();
+
+    // Send confirmation email with price
+    const emailSubject = 'Booking Confirmation';
+    const emailMessage = `
+      Dear ${passengerName},
+
+      Your booking has been confirmed with the following details:
+      - Bus Number: ${busNumber}
+      - Seat Number: ${seatNumber}
+      - Boarding Place: ${boardingPlace}
+      - Destination Place: ${destinationPlace}
+      - Date and Time: ${new Date(date).toLocaleString()}
+      - Price: ${price}
+      - Cancellation Token: ${cancellationToken}
+
+      Thank you for choosing our service.
+
+      Regards,
+      Your Bus Booking Team
+    `;
+
+    await sendEmail(email, emailSubject, emailMessage);
+
     res.status(201).json({
-      message: 'Seat booked successfully',
-      booking: savedBooking,
+      message: 'Seat booked successfully, confirmation email sent',
+      booking: { ...savedBooking._doc, price },
       cancellationToken,
     });
   } catch (err) {
@@ -223,6 +271,8 @@ exports.bookSeatWithPayment = async (req, res) => {
     res.status(500).json({ message: 'Error booking seat', error: err.message });
   }
 };
+
+
 
 // Cancel Booking
 exports.cancelBooking = async (req, res) => {

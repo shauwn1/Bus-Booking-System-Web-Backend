@@ -49,11 +49,12 @@ exports.issuePermit = async (req, res) => {
 
 // Update a Permit
 exports.updatePermit = async (req, res) => {
-  const { id } = req.params;
+  const { id } = req.params; // This is the permitNumber, not the _id
   const { validFrom, validTo, isActive } = req.body;
 
   try {
-    const permit = await Permit.findById(id);
+    // Find the permit by permitNumber instead of _id
+    const permit = await Permit.findOne({ permitNumber: id });
     if (!permit) {
       return res.status(404).json({ message: 'Permit not found' });
     }
@@ -97,19 +98,43 @@ exports.getPermits = async (req, res) => {
 };
 
 
-// Deactivate a Permit
-exports.deactivatePermit = async (req, res) => {
+exports.getPermitById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const permit = await Permit.findById(id);
+    const permit = await Permit.findOne({ permitNumber: id }).populate('routeId', 'routeId startPoint endPoint distance');
+
     if (!permit) {
       return res.status(404).json({ message: 'Permit not found' });
     }
 
-    permit.isActive = false; // Mark as inactive
+    res.status(200).json(permit);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching permit details', error: err.message });
+  }
+};
+
+
+
+// Deactivate a Permit
+exports.deactivatePermit = async (req, res) => {
+  const { id } = req.params; // `id` refers to `permitNumber`
+
+  try {
+    // Find the permit by `permitNumber`
+    const permit = await Permit.findOne({ permitNumber: id });
+    if (!permit) {
+      return res.status(404).json({ message: 'Permit not found' });
+    }
+
+    // Mark the permit as inactive
+    if (!permit.isActive) {
+      return res.status(400).json({ message: 'Permit is already deactivated' });
+    }
+    permit.isActive = false;
+
     const deactivatedPermit = await permit.save();
-    res.status(200).json({ message: 'Permit deactivated', deactivatedPermit });
+    res.status(200).json({ message: 'Permit deactivated successfully', deactivatedPermit });
   } catch (err) {
     res.status(500).json({ message: 'Error deactivating permit', error: err.message });
   }
