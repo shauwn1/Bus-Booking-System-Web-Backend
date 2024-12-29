@@ -34,8 +34,10 @@ module.exports = router;
  *             properties:
  *               username:
  *                 type: string
+ *                 example: admin123
  *               password:
  *                 type: string
+ *                 example: password123
  *     responses:
  *       200:
  *         description: Successful login
@@ -46,9 +48,19 @@ module.exports = router;
  *               properties:
  *                 token:
  *                   type: string
+ *                   example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
  *       400:
  *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Invalid credentials
  */
+
 
 /**
  * @swagger
@@ -66,12 +78,44 @@ module.exports = router;
  *             schema:
  *               type: object
  *               properties:
- *                 id:
+ *                 _id:
  *                   type: string
+ *                   example: 67687a55c209db5463aaa4c2
  *                 username:
  *                   type: string
+ *                   example: admin123
  *                 role:
  *                   type: string
+ *                   example: admin
+ *                 isActive:
+ *                   type: boolean
+ *                   example: true
+ *                 createdAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2024-12-22T10:00:00.000Z
+ *                 updatedAt:
+ *                   type: string
+ *                   format: date-time
+ *                   example: 2024-12-22T10:00:00.000Z
  *       401:
  *         description: Unauthorized
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: No token, authorization denied
+ *       403:
+ *         description: Forbidden
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Access denied. Admins only.
  */

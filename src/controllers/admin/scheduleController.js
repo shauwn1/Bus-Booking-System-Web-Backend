@@ -7,37 +7,38 @@ exports.createSchedule = async (req, res) => {
   const { scheduleId, routeId, busNumber, startPoint, endPoint, startTime, endTime, stops, days } = req.body;
 
   try {
-    // Validate scheduleId uniqueness
     const existingSchedule = await Schedule.findOne({ scheduleId });
     if (existingSchedule) {
       return res.status(400).json({ message: 'Schedule ID already exists' });
     }
 
-    // Validate Route
     const route = await Route.findOne({ routeId });
     if (!route) {
       return res.status(404).json({ message: 'Route not found' });
     }
 
-    // Validate start and end points
-    if (!route.stops.includes(startPoint) || !route.stops.includes(endPoint)) {
-      return res.status(400).json({ message: 'Start point or end point not in route stops' });
+    if (route.startPoint !== startPoint || route.endPoint !== endPoint) {
+      return res.status(400).json({ message: 'Start point or end point does not match route boundaries' });
     }
 
-    // Validate startPoint comes before endPoint
-    const startIndex = route.stops.indexOf(startPoint);
-    const endIndex = route.stops.indexOf(endPoint);
-    if (startIndex >= endIndex) {
+    const fullStops = [route.startPoint, ...route.stops, route.endPoint];
+    const startIndex = fullStops.indexOf(startPoint);
+    const endIndex = fullStops.indexOf(endPoint);
+
+    if (startIndex === -1 || endIndex === -1 || startIndex >= endIndex) {
       return res.status(400).json({ message: 'Start point must come before end point' });
     }
 
-    // Validate Bus using busNumber
-    const bus = await Bus.findOne({ busNumber });
-    if (!bus || !bus.isActive) {
-      return res.status(400).json({ message: 'Bus is inactive or not found' });
+    const invalidStops = stops.filter(stop => !route.stops.includes(stop.stopName));
+    if (invalidStops.length > 0) {
+      return res.status(400).json({ message: 'Invalid stops provided', invalidStops });
     }
 
-    // Validate Permit
+    const bus = await Bus.findOne({ busNumber, isActive: true });
+    if (!bus) {
+      return res.status(404).json({ message: 'Bus not found or inactive' });
+    }
+
     const permit = await Permit.findOne({
       busNumber,
       routeId,
@@ -49,9 +50,8 @@ exports.createSchedule = async (req, res) => {
       return res.status(400).json({ message: 'No valid permit found for this bus and route' });
     }
 
-    // Create the schedule
     const schedule = new Schedule({
-      scheduleId, // Use custom schedule ID
+      scheduleId,
       routeId,
       startPoint,
       endPoint,
@@ -61,6 +61,7 @@ exports.createSchedule = async (req, res) => {
       stops,
       days,
     });
+
     const savedSchedule = await schedule.save();
     res.status(201).json(savedSchedule);
   } catch (err) {
@@ -68,6 +69,9 @@ exports.createSchedule = async (req, res) => {
     res.status(500).json({ message: 'Error creating schedule', error: err.message });
   }
 };
+
+
+
 
 
 

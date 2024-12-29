@@ -16,7 +16,7 @@ const scheduleRoutes = require('./routes/admin/scheduleRoutes');
 const busRoutes = require('./routes/admin/busRoutes');
 const permitRoutes = require('./routes/admin/permitRoutes');
 const busOperatorAuthRoutes = require('./routes/busOperator/busOperatorAuthRoutes');
-const busOperatorActionsRoutes = require('./routes/busOperator/busOperatorActionRoutes'); // For operator-specific actions
+const busOperatorActionsRoutes = require('./routes/busOperator/busOperatorActionRoutes.js'); // For operator-specific actions
 
 // Import Error Handling Middleware
 const errorHandler = require('./middlewares/errorHandler');
