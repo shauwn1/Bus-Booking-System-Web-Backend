@@ -155,15 +155,16 @@ module.exports = router;
  *                   properties:
  *                     from:
  *                       type: string
- *                     example: Colombo
- *                     description: Starting stop
- *                     required: true
- *                     type: string
- *                     example: Kandy
- *                     description: Destination stop
+ *                       example: Colombo
+ *                       description: Starting stop
+ *                       required: true
+ *                     to:
+ *                       type: string
+ *                       example: Kandy
+ *                       description: Destination stop
  *                     price:
  *                       type: number
- *                       example: 700 
+ *                       example: 700
  *     responses:
  *       200:
  *         description: Route updated successfully
@@ -213,6 +214,7 @@ module.exports = router;
  *       500:
  *         description: Server error
  */
+
 
 /**
  * @swagger
