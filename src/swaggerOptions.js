@@ -1,7 +1,8 @@
 const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const swaggerOptions = {
-  definition: {
+  swaggerDefinition: {
     openapi: '3.0.0',
     info: {
       title: 'Bus Management System API',
@@ -10,30 +11,20 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:5001',
+        url: 'http://localhost:5001', // Local development server
         description: 'Local Development Server',
       },
-    ],
-    components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-        },
-      },
-    },
-    security: [
       {
-        bearerAuth: [],
+        url: 'https://bus-booking-system-web-backend-production.up.railway.app', // Deployed server
+        description: 'Deployed Production Server',
       },
     ],
   },
-  apis: ['./src/routes/**/*.js'], 
-
+  apis: ['./routes/**/*.js'], // Adjust this to your API files
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-console.log(swaggerDocs); // Debug log to check the generated spec
-module.exports = swaggerDocs;
+module.exports = (app) => {
+  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+};
