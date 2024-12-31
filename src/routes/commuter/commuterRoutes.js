@@ -22,6 +22,23 @@ router.post('/book-with-payment', bookSeatWithPayment);
 // Cancel a booking
 router.post('/cancel-booking', cancelBooking);
 
+
+router.get('/bookings/:transactionId', async (req, res) => {
+  const { transactionId } = req.params;
+
+  try {
+    const booking = await Booking.findOne({ transactionId });
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.status(200).json(booking);
+  } catch (err) {
+    console.error('Error fetching booking details:', err.message);
+    res.status(500).json({ message: 'Error fetching booking details', error: err.message });
+  }
+});
+
 module.exports = router;
 /**
  * @swagger

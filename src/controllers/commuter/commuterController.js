@@ -159,6 +159,9 @@ const processRefund = (transactionId) => {
 // Book a Seat with Payment
 const sendEmail = require('../../utils/sendEmail');
 
+const QRCode = require('qrcode');
+
+
 exports.bookSeatWithPayment = async (req, res) => {
   const {
     busNumber,
@@ -168,17 +171,17 @@ exports.bookSeatWithPayment = async (req, res) => {
     email,
     boardingPlace,
     destinationPlace,
-    date, // Include time in the date field
+    date
   } = req.body;
 
   try {
-    // Validate the busNumber
+    // Verify bus details
     const bus = await Bus.findOne({ busNumber });
     if (!bus || !bus.isActive) {
       return res.status(404).json({ message: 'Bus is inactive or not found' });
     }
 
-    // Check if the seat is already booked for the specified date and time
+    // Check if the seat is already booked
     const existingBooking = await Booking.findOne({
       busNumber,
       seatNumber,
@@ -188,7 +191,7 @@ exports.bookSeatWithPayment = async (req, res) => {
       return res.status(400).json({ message: 'Seat already booked' });
     }
 
-    // Fetch the schedule and ensure the time falls within the schedule range
+    // Find the schedule for the given date
     const schedule = await Schedule.findOne({
       busNumber,
       startTime: { $lte: new Date(date) },
@@ -199,7 +202,7 @@ exports.bookSeatWithPayment = async (req, res) => {
       return res.status(404).json({ message: 'No schedule found for this bus at the given date and time' });
     }
 
-    // Fetch the route and find the price
+    // Fetch route details and price
     const route = await Route.findOne({ routeId: schedule.routeId });
     if (!route) {
       return res.status(404).json({ message: 'No route found for this schedule' });
@@ -220,10 +223,10 @@ exports.bookSeatWithPayment = async (req, res) => {
       return res.status(400).json({ message: 'Payment failed' });
     }
 
-    // Create a cancellation token
+    // Generate a cancellation token
     const cancellationToken = crypto.randomBytes(16).toString('hex');
 
-    // Create a new booking
+    // Save the booking in the database
     const booking = new Booking({
       busNumber,
       seatNumber,
@@ -239,7 +242,25 @@ exports.bookSeatWithPayment = async (req, res) => {
 
     const savedBooking = await booking.save();
 
-    // Send confirmation email with price
+    // Generate the QR code
+    const bookingDetails = {
+      busNumber,
+      seatNumber,
+      passengerName,
+      boardingPlace,
+      destinationPlace,
+      date: new Date(date).toLocaleString(),
+      price,
+      transactionId: paymentResult.transactionId,
+      cancellationToken,
+    };
+
+    // Generate booking details URL
+    const bookingDetailsUrl = `https://bus-booking-system-web-backend-production.up.railway.app/api/bookings/${paymentResult.transactionId}`;
+
+    const qrCodeData = await QRCode.toDataURL(JSON.stringify(bookingDetails));
+
+    // Send confirmation email with QR code
     const emailSubject = 'Booking Confirmation';
     const emailMessage = `
       Dear ${passengerName},
@@ -253,24 +274,30 @@ exports.bookSeatWithPayment = async (req, res) => {
       - Price: ${price}
       - Cancellation Token: ${cancellationToken}
 
-      Thank you for choosing our service.
+      Please find your QR code below for verification.
 
       Regards,
       Your Bus Booking Team
     `;
 
-    await sendEmail(email, emailSubject, emailMessage);
+    // Pass the QR code as an attachment
+    await sendEmail(email, emailSubject, emailMessage, qrCodeData);
 
     res.status(201).json({
-      message: 'Seat booked successfully, confirmation email sent',
+      message: 'Seat booked successfully',
       booking: { ...savedBooking._doc, price },
-      cancellationToken,
+      qrCode: qrCodeData, // Include QR code in response for frontend usage
     });
   } catch (err) {
     console.error('Error booking seat:', err.message);
     res.status(500).json({ message: 'Error booking seat', error: err.message });
   }
 };
+
+
+
+
+
 
 
 

@@ -17,7 +17,7 @@ const busRoutes = require('./routes/admin/busRoutes');
 const permitRoutes = require('./routes/admin/permitRoutes');
 const busOperatorAuthRoutes = require('./routes/busOperator/busOperatorAuthRoutes');
 const busOperatorActionsRoutes = require('./routes/busOperator/busOperatorActionRoutes.js'); // For operator-specific actions
-
+const bookingRoutes = require('./routes/commuter/commuterRoutes');
 // Import Error Handling Middleware
 const errorHandler = require('./middlewares/errorHandler');
 
@@ -44,6 +44,7 @@ app.use('/api/admin/buses', busRoutes); // For bus management
 app.use('/api/admin/permits', permitRoutes); // Permit routes
 app.use('/api/bus-operators/auth', busOperatorAuthRoutes);
 app.use('/api/bus-operators/actions', busOperatorActionsRoutes); // Operator-specific actions
+app.use('/api', bookingRoutes);
 // Error Handling Middleware
 app.use(errorHandler);
 
