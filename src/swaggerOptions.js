@@ -11,20 +11,36 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:5001', // Local development server
-        description: 'Local Development Server',
+        url: process.env.SWAGGER_URL || 'http://localhost:5001/api-docs', // Use environment variable or fallback to localhost
       },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
       {
-        url: 'https://bus-booking-system-web-backend-production.up.railway.app', // Deployed server
-        description: 'Deployed Production Server',
+        bearerAuth: [],
       },
     ],
   },
-  apis: ['./routes/**/*.js'], // Adjust this to your API files
+  apis: ['./routes/**/*.js'], 
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
 module.exports = (app) => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+  // Log the Swagger URL being used
+  console.log(
+    `Swagger documentation available at ${
+      process.env.SWAGGER_URL || 'http://localhost:5001/api-docs'
+    }/api-docs`
+  );
 };
