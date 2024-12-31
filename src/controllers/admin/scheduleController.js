@@ -98,7 +98,7 @@ exports.updateSchedule = async (req, res) => {
   const { routeId, scheduleId, busNumber, startPoint, endPoint, startTime, endTime, stops, days } = req.body;
 
   try {
-    const schedule = await Schedule.findById(id);
+    const schedule = await Schedule.findOne({ scheduleId: id });
     if (!schedule) {
       return res.status(404).json({ message: 'Schedule not found' });
     }

@@ -36,10 +36,10 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerJsDoc));
 
 // API Routes
 app.use('/api/admin', adminRoutes); // Admin-related routes
-app.use('/api/bus-operators', busOperatorRoutes); // Bus operator-related routes
+app.use('/api/admin/bus-operators', busOperatorRoutes); // Bus operator-related routes
 app.use('/api/commuters', commuterRoutes); // Commuter-related routes
-app.use('/api/routes', routeRoutes); // For routes management
-app.use('/api/schedules', scheduleRoutes); // For schedules management
+app.use('/api/admin/routes', routeRoutes); // For routes management
+app.use('/api/admin/schedules', scheduleRoutes); // For schedules management
 app.use('/api/admin/buses', busRoutes); // For bus management
 app.use('/api/admin/permits', permitRoutes); // Permit routes
 app.use('/api/bus-operators/auth', busOperatorAuthRoutes);

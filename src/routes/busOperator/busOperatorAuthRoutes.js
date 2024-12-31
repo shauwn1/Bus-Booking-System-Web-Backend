@@ -23,7 +23,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/auth/login:
+ * /api/bus-operators/auth/login:
  *   post:
  *     summary: Operator login
  *     tags: [BusOperatorAuth]
@@ -65,7 +65,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/auth/profile:
+ * /api/bus-operators/auth/profile:
  *   get:
  *     summary: Get operator profile
  *     tags: [BusOperatorAuth]

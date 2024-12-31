@@ -13,7 +13,7 @@ const router = express.Router();
 
 // Protect all bus operator-related routes
 router.post('/', protect, verifyAdminRole, addBusOperator);
-router.put('/:id', protect, verifyAdminRole, updateBusOperator);
+router.put('/update/:id', protect, verifyAdminRole, updateBusOperator);
 router.get('/', protect, verifyAdminRole, getBusOperators);
 router.get('/:operatorId', protect, verifyAdminRole, getBusOperatorById);
 router.delete('/:id', protect, verifyAdminRole, deactivateBusOperator);
@@ -31,7 +31,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators:
+ * /api/admin/bus-operators:
  *   post:
  *     summary: Add a bus operator
  *     tags: [BusOperator]
@@ -115,7 +115,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators:
+ * /api/admin/bus-operators:
  *   get:
  *     summary: Get all bus operators
  *     tags: [BusOperator]
@@ -175,7 +175,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/{operatorId}:
+ * /api/admin/bus-operators/{operatorId}:
  *   get:
  *     summary: Get a bus operator by operatorId
  *     tags: [BusOperator]
@@ -243,7 +243,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/{id}:
+ * /api/admin/bus-operators/update/{id}:
  *   put:
  *     summary: Update a bus operator
  *     tags: [BusOperator]
@@ -324,7 +324,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/{operatorId}:
+ * /api/admin/bus-operators/{operatorId}:
  *   delete:
  *     summary: Deactivate a bus operator
  *     tags: [BusOperator]
