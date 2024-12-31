@@ -12,10 +12,10 @@ const verifyAdminRole = require('../../middlewares/roleMiddleware');
 const router = express.Router();
 
 // Protect all permit-related routes
-router.post('/', protect, verifyAdminRole, issuePermit);
-router.put('/:id', protect, verifyAdminRole, updatePermit); // `id` refers to `permitNumber` here
+router.post('/issue', protect, verifyAdminRole, issuePermit);
+router.put('/update/:id', protect, verifyAdminRole, updatePermit); // `id` refers to `permitNumber` here
 router.get('/', protect, verifyAdminRole, getPermits);
-router.delete('/:id', protect, verifyAdminRole, deactivatePermit);
+router.delete('/deactivate/:id', protect, verifyAdminRole, deactivatePermit);
 router.get('/:id', protect, verifyAdminRole, getPermitById);
 
 
@@ -29,7 +29,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /admin/permits:
+ * /api/admin/permits/issue:
  *   post:
  *     summary: Issue a permit
  *     tags: [Permit]
@@ -106,7 +106,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /admin/permits:
+ * /api/admin/permits/:
  *   get:
  *     summary: Get all permits
  *     tags: [Permit]
@@ -145,7 +145,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /admin/permits/{id}:
+ * /api/admin/permits/{id}:
  *   get:
  *     summary: Get permit by ID
  *     tags: [Permit]
@@ -216,7 +216,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /admin/permits/{id}:
+ * /api/admin/permits/update/{id}:
  *   put:
  *     summary: Update a permit
  *     tags: [Permit]
@@ -292,7 +292,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /admin/permits/{id}:
+ * /api/admin/permits/deactivate/{id}:
  *   delete:
  *     summary: Deactivate a permit
  *     tags: [Permit]

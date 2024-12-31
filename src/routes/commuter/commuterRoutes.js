@@ -49,7 +49,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /commuters/buses:
+ * /api/commuters/buses:
  *   get:
  *     summary: Search for available buses
  *     tags: [Commuter]
@@ -124,7 +124,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /commuters/seats:
+ * /api/commuters/seats:
  *   get:
  *     summary: Get seat availability
  *     tags: [Commuter]
@@ -161,7 +161,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /commuters/book-with-payment:
+ * /api/commuters/book-with-payment:
  *   post:
  *     summary: Book a seat with payment
  *     tags: [Commuter]

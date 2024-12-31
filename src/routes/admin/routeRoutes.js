@@ -26,7 +26,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /routes:
+ * /api/admin/routes:
  *   post:
  *     summary: Create a route
  *     tags: [Route]
@@ -73,7 +73,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /routes:
+ * /api/admin/routes:
  *   get:
  *     summary: Get all routes or filter by criteria
  *     tags: [Route]
@@ -120,7 +120,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /routes/{id}:
+ * /api/admin/routes/{id}:
  *   put:
  *     summary: Update a route
  *     tags: [Route]
@@ -218,7 +218,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /routes/{id}:
+ * /api/admin/routes/{id}:
  *   delete:
  *     summary: Delete a route by routeId
  *     tags: [Route]

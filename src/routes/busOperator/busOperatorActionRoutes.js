@@ -29,19 +29,12 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/actions/schedules:
+ * /api/bus-operators/actions/schedules:
  *   get:
  *     summary: View schedules for operator's buses
  *     tags: [BusOperatorActions]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: date
- *         schema:
- *           type: string
- *           format: date
- *         description: Date to filter schedules
  *     responses:
  *       200:
  *         description: List of schedules for operator's buses
@@ -75,7 +68,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/actions/bookings:
+ * /api/bus-operators/actions/bookings:
  *   get:
  *     summary: View seat bookings for operator's buses
  *     tags: [BusOperatorActions]
@@ -121,7 +114,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /bus-operators/actions/reassign-bus:
+ * /api/bus-operators/actions/reassign-bus:
  *   put:
  *     summary: Reassign a bus in a schedule
  *     tags: [BusOperatorActions]

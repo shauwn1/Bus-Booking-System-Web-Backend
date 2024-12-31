@@ -4,13 +4,13 @@ const { createSchedule, getSchedules, updateSchedule } = require('../../controll
 const protect = require('../../middlewares/authMiddleware');
 
 // Create a Schedule (admin only)
-router.post('/', protect, createSchedule);
+router.post('/add', protect, createSchedule);
 
 // Get All Schedules (admin only)
 router.get('/', protect, getSchedules);
 
 // Update a Schedule (admin only)
-router.put('/:id', protect, updateSchedule);
+router.put('/update/:id', protect, updateSchedule);
 
 module.exports = router;
 
@@ -23,7 +23,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /schedules:
+ * /api/admin/schedules/add:
  *   post:
  *     summary: Create a schedule
  *     tags: [Schedule]
@@ -78,7 +78,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /schedules:
+ * /api/admin/schedules:
  *   get:
  *     summary: Get all schedules
  *     tags: [Schedule]
@@ -95,7 +95,7 @@ module.exports = router;
 
 /**
  * @swagger
- * /schedules/{id}:
+ * /api/admin/schedules/update/{id}:
  *   put:
  *     summary: Update a schedule
  *     tags: [Schedule]

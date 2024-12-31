@@ -10,11 +10,11 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:5001',
+        url: 'http://localhost:5001', // Local server
         description: 'Local Development Server',
       },
       {
-        url: 'https://bus-booking-system-web-backend-production.up.railway.app',
+        url: 'https://bus-booking-system-web-backend-production.up.railway.app', // Deployed server
         description: 'Deployed Server',
       },
     ],
@@ -37,6 +37,4 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
-
-console.log(swaggerDocs); // Debug log to check the generated spec
 module.exports = swaggerDocs;
