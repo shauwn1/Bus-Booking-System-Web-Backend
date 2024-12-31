@@ -1,8 +1,7 @@
 const swaggerJsDoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
 
 const swaggerOptions = {
-  swaggerDefinition: {
+  definition: {
     openapi: '3.0.0',
     info: {
       title: 'Bus Management System API',
@@ -11,7 +10,12 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: process.env.SWAGGER_URL || 'http://localhost:5001/api-docs', // Use environment variable or fallback to localhost
+        url: 'http://localhost:5001',
+        description: 'Local Development Server',
+      },
+      {
+        url: 'https://bus-booking-system-web-backend-production.up.railway.app',
+        description: 'Deployed Server',
       },
     ],
     components: {
@@ -29,18 +33,10 @@ const swaggerOptions = {
       },
     ],
   },
-  apis: ['./routes/**/*.js'], 
+  apis: ['./src/routes/**/*.js'], // Adjust the path to match your actual routes
 };
 
 const swaggerDocs = swaggerJsDoc(swaggerOptions);
 
-module.exports = (app) => {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
-
-  // Log the Swagger URL being used
-  console.log(
-    `Swagger documentation available at ${
-      process.env.SWAGGER_URL || 'http://localhost:5001/api-docs'
-    }/api-docs`
-  );
-};
+console.log(swaggerDocs); // Debug log to check the generated spec
+module.exports = swaggerDocs;
